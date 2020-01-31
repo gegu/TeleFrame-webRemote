@@ -26,7 +26,7 @@ npm install
 ```
 
 Then Restart TeleFrame. Open a web browser and enter the IP of your TeleFrame including the configured port to remote control your TeleFrame.
-For example: http://192.168.0.5:3000
+For example: `http://192.168.0.5:3000`
 
 ## Configuration options
 
