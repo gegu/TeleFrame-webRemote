@@ -20,8 +20,9 @@ To install the **TeleFrame-webRemote**  addon demo open a terminal and execute:
 ```sh
 cd ~/TeleFrame/addons
 git clone https://github.com/gegu/TeleFrame-webRemote
+cd TeleFrame-webRemote
 npm install
-../tools/addon_control.sh enable TeleFrame-webRemote
+../../tools/addon_control.sh enable TeleFrame-webRemote
 ```
 
 Then Restart TeleFrame. Open a web browser and enter the IP of your TeleFrame including the configured port to remote control your TeleFrame.
