@@ -13,7 +13,7 @@ Without configuration the addon starts a web server on default port 3000.
 To implement this, it would be necessary to add user authentication to the server and operate it with SSL.
 
 ---
-### Installation
+## Installation
 
 To install the **TeleFrame-webRemote**  addon demo open a terminal and execute:
 
@@ -28,7 +28,7 @@ npm install
 Then Restart TeleFrame. Open a web browser and enter the IP of your TeleFrame including the configured port to remote control your TeleFrame.
 For example: http://192.168.0.5:3000
 
-### Configuration options
+## Configuration options
 
 The following configuration options are available.
 
@@ -37,3 +37,12 @@ The following configuration options are available.
 | port                        | number | TCPIP port on which the server should run. _Default_ : 3000                                |
 | statusUpdateInterval        | number | milliseconds between polls for status updates. _Default_: 1000                             |
 | statusUpdateIntervalOffline | number | milliseconds between polls for status updates, when TeleFrame is offline. _Default_: 10000 |
+
+
+## Contributing
+
+Please feel free to add [issues](https://github.com/gegu/TeleFrame-webRemote/issues) or send pull requests.
+
+## Thanks!
+
+Special thanks go to the great [TeleFrame](https://github.com/LukeSkywalker92/TeleFrame) project Without it this project would not have been possible.
