@@ -4,9 +4,14 @@
 
 This is an addon for the great [TeleFrame](https://github.com/LukeSkywalker92/TeleFrame) project, to demonstrate what is possible with the addon interface.
 
-With this addon you can remote control your TeleFrame with a web browser. You get the same output that TeleFrame is currently displaying.
+With this addon you can remote control your TeleFrame with a web browser. You get the same output that TeleFrame is currently displaying, with a responsive interface.
 
-For interaction you have a touchbar like in TeleFrame, with two additional elements for uploading pictures/videos and for full screen display. The touchbar in the web browser also supports mouse clicks.
+For interaction you have a touchbar like in TeleFrame, with additional elements to
+
+- toggle screen on/off when commands for screen on/off are defined in TeleFrame.
+- uploading pictures/videos (Works also with double click or with double tap)
+- toggle full screen display
+
 Without configuration the addon starts a web server on default port 3000.
 
 **SECURITY WARNING: Do not make the web server accessible from the Internet. There will be no user authentication and everybody can access your TeleFrame!**

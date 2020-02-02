@@ -12,12 +12,14 @@ class WebRemote extends AddonBase {
       unseenCount: this.getUnseenCount(),
       isPaused: false,
       isMuted: false,
+      screenOn: true,
       newImageNotify: false
     };
 
     // register required listeners
     this.registerListener('teleFrame-ready', teleFrameObjects => {
       this.teleFrameObjects = teleFrameObjects;
+      this.updateStatus({ screenOn: teleFrameObjects.screen.screenOn });
     });
     this.registerListener('renderer-ready', () => {
       webServer.runServer(this, config.port || 3000);
@@ -29,24 +31,17 @@ class WebRemote extends AddonBase {
       image: this.images[index],
       fadeTime: fadeTime
     }));
-    this.registerListener('newImage', () => {
-      this.updateStatus({
-        unseenCount: this.getUnseenCount(),
-        image: this.images[0],
-        newImageNotify: true
-      });
-    });
-    this.registerListener('imageUnseenRemoved', () => {
-      this.updateStatus({
-        unseenCount: 0,
-        newImageNotify: false
-      });
-    });
-    this.registerListener('imageDeleted', () => {
-      this.updateStatus({
-        unseenCount: this.getUnseenCount()
-      });
-    });
+    this.registerListener('newImage', () => this.updateStatus({
+      unseenCount: this.getUnseenCount(),
+      image: this.images[0],
+      newImageNotify: true
+    }));
+    this.registerListener('imageUnseenRemoved', () => this.updateStatus({
+      unseenCount: 0,
+      newImageNotify: false
+    }));
+    this.registerListener('imageDeleted', () => this.updateStatus({ unseenCount: this.getUnseenCount() }));
+    this.registerListener('screenOn', (newStatus) => this.updateStatus({ screenOn: newStatus }));
   }
 
   /**

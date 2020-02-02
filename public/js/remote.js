@@ -1,13 +1,19 @@
 (async () => {
 
-  const config = await fetch('/tfconfig').then(response => response.json());
+  const configObjects = await fetch('/tfconfig').then(response => response.json());
+  const config = configObjects.config;
+  const screen = configObjects.screen;
 
-  var status = {
+  const status = {
     image: {},
+    fadeTime: 0,
     imagesCount: 0,
     unseenCount: false,
     unseenCount: 0,
-    isPaused: false
+    isPaused: false,
+    isMuted: false,
+    screenOn: true,
+    newImageNotify: false
   };
 
   var fetchTimeout;
@@ -20,17 +26,23 @@
   }
 
   const touchBarElements = {
-    'showNewest': new TouchBarElement('fas fa-history', () => { fetch('/command/newest').then(() => updateStatus()) }),
-    'previousImage': new TouchBarElement('far fa-arrow-alt-circle-left', () => { fetch('/command/previous').then(() => updateStatus()) }),
-    'playPause': new TouchBarElement('far fa-pause-circle', () => { fetch('/command/playPause').then(() => updateStatus()); }),
-    'nextImage': new TouchBarElement('far fa-arrow-alt-circle-right', () => { fetch('/command/next').then(() => updateStatus()) }),
-    'starImage': new TouchBarElement('far fa-star', () => { fetch('/command/star').then(() => updateStatus()) }),
+    'showNewest': new TouchBarElement('fas fa-history', () => fetch('/command/newest').then(() => updateStatus())),
+    'previousImage': new TouchBarElement('far fa-arrow-alt-circle-left', () => fetch('/command/previous').then(() => updateStatus())),
+    'playPause': new TouchBarElement('far fa-pause-circle', () => fetch('/command/playPause').then(() => updateStatus())),
+    'nextImage': new TouchBarElement('far fa-arrow-alt-circle-right', () => fetch('/command/next').then(() => updateStatus())),
+    'starImage': new TouchBarElement('far fa-star', () => fetch('/command/star').then(() => updateStatus())),
     'deleteImage': new TouchBarElement('far fa-trash-alt', deleteImage),
-    'mute': new TouchBarElement('fas fa-volume-up', () => { fetch('/command/mute').then(() => updateStatus())  }),
+    'mute': new TouchBarElement('fas fa-volume-up', () => fetch('/command/mute').then(() => updateStatus())),
     'shutdown': new TouchBarElement('fas fa-power-off', shutdown),
     'reboot': new TouchBarElement('fas fa-redo-alt', reboot),
+    'tfScreenToggle': new TouchBarElement('far fa-sun', () => fetch('/command/tfScreenToggle').then(() => updateStatus())),
     'upload': new TouchBarElement('fas fa-upload', upload),
   }
+
+  if (!screen.cmdBacklightOn || !screen.cmdBacklightOff) {
+    delete touchBarElements.tfScreenToggle;
+  }
+
   const touchBarElemKeys = Object.keys(touchBarElements);
   const touchBar = new TouchBar(touchBarElements, {
     height: config.touchBar.height,
@@ -55,7 +67,8 @@
     'line-height': ''
   })
 
-  const touchHeight = Math.max(40, Math.min(75, config.touchBar.height.replace(/(px)|(vh)/g, '')));
+  const smallTouchHeight = 35;
+  const touchHeight = Math.max(smallTouchHeight, Math.min(75, config.touchBar.height.replace(/(px)|(vh)/g, '')));
   const smallIconsMaxWidth =parseInt($('.touch-bar > .touchBarElement').length * touchHeight);
   $('head').append(
 `<style id="touchBarHeight">
@@ -71,17 +84,16 @@
 
   @media screen and (max-width: ${smallIconsMaxWidth}px) {
     .touch-bar-container {
-      height: 40px;
-      bottom: -40px;
+      height: ${smallTouchHeight}px;
+      bottom: -${smallTouchHeight}px;
     }
     .touchBarElement {
-      height: 40px;
-      font-size: calc(40px * 0.8);
-      line-height: 40px;
+      height: ${smallTouchHeight}px;
+      font-size: calc(${smallTouchHeight}px * 0.8);
+      line-height: ${smallTouchHeight}px;
     }
   }
 </style>`);
-
 
   // initialize fullscreen handling
   if (screenfull.isEnabled) {
@@ -118,7 +130,7 @@
       formData.append('asset', asset);
       await fetch('/upload', {method: "POST", body: formData})
         .then(response => response.json())
-        .then(status => Swal.fire({
+        .then(_ => Swal.fire({
             title: 'Upload 👍',
             showConfirmButton: false,
             timer: 5000,
@@ -296,10 +308,15 @@
         $('.record, .deleteImage, .starImage').find('i').addClass('disabled-icon');
       }
     }
-    if (!status.isMuted) {
-      $('.mute > i').removeClass('fa-volume-mute').addClass('fa-volume-up');
-    } else {
+    if (status.isMuted) {
       $('.mute > i').removeClass('fa-volume-up').addClass('fa-volume-mute');
+    } else {
+      $('.mute > i').removeClass('fa-volume-mute').addClass('fa-volume-up');
+    }
+    if (status.screenOn) {
+      $('.tfScreenToggle > i').removeClass('fas fa-moon').addClass('far fa-sun');
+    } else {
+      $('.tfScreenToggle > i').removeClass('far fa-sun').addClass('fas fa-moon');
     }
 
   }

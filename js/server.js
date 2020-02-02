@@ -2,8 +2,8 @@ const express = require('express');
 const fileUpload = require('express-fileupload');
 const bodyParser = require('body-parser');
 const path = require('path');
+const {exec} = require('child_process');
 const server = express();
-
 const supportedUploadFileTypes = ['jpg', 'mp4'];
 const supportedUploadMimeTypes = ['image/jpeg', 'video/mpeg'];
 
@@ -35,14 +35,34 @@ const runServer = (addonInstance, listenPort) => {
       .forEach(key => delete conf[key]);
     // send only our own addon config
     conf.addonInterface.addons = { webRemote: addonInstance.config}
-    res.send(JSON.stringify(conf));
+    res.send(JSON.stringify({
+      config: conf,
+      screen: addonInstance.teleFrameObjects.screen
+    }));
   });
 
   // request to execute a conmmand - send event to TeleFrame
   server.get('/command/*', (req, res) => {
     const command = `${req.originalUrl.replace(/^\/command\//, '')}`;
-    addonInstance.sendEvent(command);
-    res.send(JSON.stringify({status: 'command sent'}));
+
+    switch(command){
+      case 'tfScreenToggle':
+        if (addonInstance.teleFrameObjects.screen.cmdBacklightOn &&
+          addonInstance.teleFrameObjects.screen.cmdBacklightOff) {
+
+          if (addonInstance.teleFrameObjects.screen.screenOn) {
+            addonInstance.teleFrameObjects.scheduler.turnMonitorOff();
+          } else {
+            addonInstance.teleFrameObjects.scheduler.turnMonitorOn();
+          }
+        }
+        res.send(JSON.stringify({status: 'command sent'}));
+        break;
+      default:
+        //  TeleFrame commands
+        addonInstance.sendEvent(command);
+        res.send(JSON.stringify({status: 'command sent'}));
+    }
   });
 
   // request supported file types to upload
