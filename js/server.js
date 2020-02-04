@@ -35,6 +35,11 @@ const runServer = (addonInstance, listenPort) => {
       .forEach(key => delete conf[key]);
     // send only our own addon config
     conf.addonInterface.addons = { webRemote: addonInstance.config}
+    // load the phrases for the browsers language
+    let lang = req.headers["accept-language"].split(',')[0];
+    conf.addonInterface.addons.webRemote.language = lang;
+    require(path.resolve(`${__dirname}/../../../js/initLanguage.js`))(conf.addonInterface.addons.webRemote, path.resolve(`${__dirname}/../config`));
+
     res.send(JSON.stringify({
       config: conf,
       screen: addonInstance.teleFrameObjects.screen

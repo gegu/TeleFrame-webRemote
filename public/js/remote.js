@@ -28,6 +28,17 @@
   // full screen toogle callback function
   const toggleFullScreen = () => screenfull.toggle($('body')[0]);
 
+  const tfScreenToggle = () => {
+    //const message = (status.screenOn ? );
+    fetch('/command/tfScreenToggle').then(() => updateStatus());
+    Swal.fire({
+      title: config.addonInterface.addons.webRemote.phrases[status.screenOn ? 'switchScreenOff' : 'switchScreenOn'],
+      showConfirmButton: false,
+      timer: 5000,
+      icon: "success"
+    });
+  };
+
   const touchBarElements = {
     showNewest: new TouchBarElement('fas fa-history', () => fetch('/command/newest').then(() => updateStatus())),
     previousImage: new TouchBarElement('far fa-arrow-alt-circle-left', () => fetch('/command/previous').then(() => updateStatus())),
@@ -38,7 +49,7 @@
     mute: new TouchBarElement('fas fa-volume-up', () => fetch('/command/mute').then(() => updateStatus())),
     shutdown: new TouchBarElement('fas fa-power-off', shutdown),
     reboot: new TouchBarElement('fas fa-redo-alt', reboot),
-    tfScreenToggle: new TouchBarElement('far fa-sun', () => fetch('/command/tfScreenToggle').then(() => updateStatus())),
+    tfScreenToggle: new TouchBarElement('far fa-sun', tfScreenToggle),
     upload: new TouchBarElement('fas fa-upload', upload),
     fullscreen:  new TouchBarElement('fas fa-expand-arrows-alt', toggleFullScreen)
   }
@@ -128,7 +139,7 @@
   async function upload() {
     const supportedUploadFileTypes = await fetch('/upload/fileTypes').then(response => response.json());
     const { value: asset } = await Swal.fire({
-      title: 'Upload \u{1F5BC}',
+      title: config.addonInterface.addons.webRemote.phrases.uploadDlgTitle,
       input: 'file',
       showCancelButton: true,
       inputAttributes: {
