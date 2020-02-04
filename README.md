@@ -6,11 +6,13 @@ This is an addon for the great [TeleFrame](https://github.com/LukeSkywalker92/Te
 
 With this addon you can remote control your TeleFrame with a web browser. You get the same output that TeleFrame is currently displaying, with a responsive interface.
 
-For interaction you have a touchbar like in TeleFrame, with additional elements to
+For interaction you have a touchbar like in TeleFrame by defaut, with additional elements to
 
 - toggle screen on/off when commands for screen on/off are defined in TeleFrame.
 - uploading pictures/videos (Works also with double click or with double tap)
 - toggle full screen display
+
+The touchbar elements for the web interface can be adjusted separately in the [configuration](#configuration-options).
 
 Without configuration the addon starts a web server on default port 3000.
 
@@ -37,11 +39,29 @@ For example: `http://192.168.0.5:3000`
 
 The following configuration options are available.
 
-| Name                        | Type   | Description                                                                                |
-| --------------------------- | ------ | ------------------------------------------------------------------------------------------ |
-| port                        | number | TCPIP port on which the server should run. _Default_ : 3000                                |
-| statusUpdateInterval        | number | milliseconds between polls for status updates. _Default_: 1000                             |
-| statusUpdateIntervalOffline | number | milliseconds between polls for status updates, when TeleFrame is offline. _Default_: 10000 |
+| Name                        | Type   | Default Value                             | Description                                                                                        |
+| --------------------------- | ------ | ----------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| port                        | number | 3000                                      | TCPIP port on which the server should run.                                                         |
+| statusUpdateInterval        | number | 1000                                      | milliseconds between polls for status updates.                                                     |
+| statusUpdateIntervalOffline | number | 10000                                     | milliseconds between polls for status updates, when TeleFrame is offline.                          |
+| touchBarElements            | array  | from TeleFrame `config.touchBar.elements` | Strings to define the touchbar elements to be used. For See the list below for available elements. |
+
+### Available Touchbar elements
+
+| Name           | description                                                                                           |
+| -------------- | ----------------------------------------------------------------------------------------------------- |
+| showNewest     | Show the newest image                                                                                 |
+| previousImage  | Show the previous image                                                                               |
+| playPause      | Toggle play/pause                                                                                     |
+| nextImage      | Show the next image                                                                                   |
+| starImage      | Toggle the current image starred/unstarred                                                            |
+| deleteImage    | Delete the current image                                                                              |
+| mute           | Mute sound output                                                                                     |
+| shutdown       | Shutdown TeleFrame                                                                                    |
+| reboot         | Reboot TeleFrame                                                                                      |
+| tfScreenToggle | _Additional_: Toggle TeleFrame screen on/off - Only available when screen switch commands are defined |
+| upload         | _Additional_: Upload image/video to TeleFrame                                                         |
+| fullscreen     | _Additional_: Toggle fullscreen view                                                                  |
 
 
 ## Contributing

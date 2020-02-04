@@ -25,35 +25,50 @@
     var audio = new Audio(`/sounds/${config.playSoundOnRecieve}`);
   }
 
+  // full screen toogle callback function
+  const toggleFullScreen = () => screenfull.toggle($('body')[0]);
+
   const touchBarElements = {
-    'showNewest': new TouchBarElement('fas fa-history', () => fetch('/command/newest').then(() => updateStatus())),
-    'previousImage': new TouchBarElement('far fa-arrow-alt-circle-left', () => fetch('/command/previous').then(() => updateStatus())),
-    'playPause': new TouchBarElement('far fa-pause-circle', () => fetch('/command/playPause').then(() => updateStatus())),
-    'nextImage': new TouchBarElement('far fa-arrow-alt-circle-right', () => fetch('/command/next').then(() => updateStatus())),
-    'starImage': new TouchBarElement('far fa-star', () => fetch('/command/star').then(() => updateStatus())),
-    'deleteImage': new TouchBarElement('far fa-trash-alt', deleteImage),
-    'mute': new TouchBarElement('fas fa-volume-up', () => fetch('/command/mute').then(() => updateStatus())),
-    'shutdown': new TouchBarElement('fas fa-power-off', shutdown),
-    'reboot': new TouchBarElement('fas fa-redo-alt', reboot),
-    'tfScreenToggle': new TouchBarElement('far fa-sun', () => fetch('/command/tfScreenToggle').then(() => updateStatus())),
-    'upload': new TouchBarElement('fas fa-upload', upload),
+    showNewest: new TouchBarElement('fas fa-history', () => fetch('/command/newest').then(() => updateStatus())),
+    previousImage: new TouchBarElement('far fa-arrow-alt-circle-left', () => fetch('/command/previous').then(() => updateStatus())),
+    playPause: new TouchBarElement('far fa-pause-circle', () => fetch('/command/playPause').then(() => updateStatus())),
+    nextImage: new TouchBarElement('far fa-arrow-alt-circle-right', () => fetch('/command/next').then(() => updateStatus())),
+    starImage: new TouchBarElement('far fa-star', () => fetch('/command/star').then(() => updateStatus())),
+    deleteImage: new TouchBarElement('far fa-trash-alt', deleteImage),
+    mute: new TouchBarElement('fas fa-volume-up', () => fetch('/command/mute').then(() => updateStatus())),
+    shutdown: new TouchBarElement('fas fa-power-off', shutdown),
+    reboot: new TouchBarElement('fas fa-redo-alt', reboot),
+    tfScreenToggle: new TouchBarElement('far fa-sun', () => fetch('/command/tfScreenToggle').then(() => updateStatus())),
+    upload: new TouchBarElement('fas fa-upload', upload),
+    fullscreen:  new TouchBarElement('fas fa-expand-arrows-alt', toggleFullScreen)
   }
 
   if (!screen.cmdBacklightOn || !screen.cmdBacklightOff) {
     delete touchBarElements.tfScreenToggle;
   }
 
-  const touchBarElemKeys = Object.keys(touchBarElements);
+  const availableTouchBarElemKeys = Object.keys(touchBarElements);
+
+  let useTouchBarElemKeys = config.addonInterface.addons.webRemote.touchBarElements;
+  if (Array.isArray(useTouchBarElemKeys) && useTouchBarElemKeys.length > 0) {
+    useTouchBarElemKeys = useTouchBarElemKeys.filter(e => availableTouchBarElemKeys.indexOf(e) > -1);;
+  } else {
+    // use elements from TeleFrame config.touchBar
+    useTouchBarElemKeys = config.touchBar.elements.filter(e => availableTouchBarElemKeys.indexOf(e) > -1);
+    useTouchBarElemKeys.push('tfScreenToggle', 'upload', 'fullscreen');
+  }
+
+
   const touchBar = new TouchBar(touchBarElements, {
     height: config.touchBar.height,
     // timout to automatically hide the touchbar.
     autoHideTimeout: 30 * 1000,
     // Defines an objectspecifying the touchbar icons to enable
-    elements: touchBarElemKeys
+    elements: useTouchBarElemKeys
   });
 
   $('.touch-container').off('touchend').on('click', () => touchBar.toggle());
-  $('.' + touchBarElemKeys.join(' ,.')).on('click', function(e) {
+  $('.' + useTouchBarElemKeys.join(' ,.')).on('click', function(e) {
     e.stopPropagation();
   //  e.preventDefault();
     $(this).trigger('touchend');
@@ -97,7 +112,6 @@
 
   // initialize fullscreen handling
   if (screenfull.isEnabled) {
-    $('.touch-bar').append('<div class="fullscreen touchBarElement"><i class="fas fa-expand-arrows-alt"></i></div>');
     screenfull.on('change', () => {
       if (screenfull.isFullscreen) {
         $('.fullscreen > i').removeClass('fa-expand-arrows-alt').addClass('fa-compress-arrows-alt');
@@ -105,16 +119,14 @@
         $('.fullscreen > i').removeClass('fa-compress-arrows-alt').addClass('fa-expand-arrows-alt');
       }
   	});
-    $('.fullscreen').on('click', () => {
-    		screenfull.toggle($('body')[0]);
-    });
-    $('body').on('dblclick', () => $('.fullscreen').trigger('click'));
-  } else console.warn('screenfull disabled');
+    $('body').on('dblclick', toggleFullScreen);
+  } else {
+    console.warn('screenfull disabled');
+    $('.fullscreen').remove();
+  }
 
-
-   async function upload() {
+  async function upload() {
     const supportedUploadFileTypes = await fetch('/upload/fileTypes').then(response => response.json());
-
     const { value: asset } = await Swal.fire({
       title: 'Upload \u{1F5BC}',
       input: 'file',
