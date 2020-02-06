@@ -6,6 +6,7 @@ const {exec} = require('child_process');
 const server = express();
 const supportedUploadFileTypes = ['jpg', 'mp4'];
 const supportedUploadMimeTypes = ['image/jpeg', 'video/mpeg'];
+const teleFramePath = path.resolve(`${__dirname}/../../../`);
 
 // configure server
 server.use(fileUpload());
@@ -36,9 +37,13 @@ const runServer = (addonInstance, listenPort) => {
     // send only our own addon config
     conf.addonInterface.addons = { webRemote: addonInstance.config}
     // load the phrases for the browsers language
-    let lang = req.headers["accept-language"].split(',')[0];
-    conf.addonInterface.addons.webRemote.language = lang;
-    require(path.resolve(`${__dirname}/../../../js/initLanguage.js`))(conf.addonInterface.addons.webRemote, path.resolve(`${__dirname}/../config`));
+    conf.language = req.headers["accept-language"].split(',')[0];
+    delete conf.phrases;
+
+    const initLanguage = require(path.resolve(`${teleFramePath}/js/initLanguage.js`));
+    initLanguage(conf);
+    conf.addonInterface.addons.webRemote.language = conf.language;
+    initLanguage(conf.addonInterface.addons.webRemote, path.resolve(`${__dirname}/../config`));
 
     res.send(JSON.stringify({
       config: conf,
@@ -92,7 +97,7 @@ const runServer = (addonInstance, listenPort) => {
           let imgDestPath = addonInstance.teleFrameObjects.config.imageFolder;
           // resolve relative paths if needed
           if (imgDestPath.search(/^[.a-z0-9_-]/i)) {
-            imgDestPath = path.resolve(`${__dirname}/../../../${imgDestPath}/${imgDestName}`);
+            imgDestPath = path.resolve(`${teleFramePath}/${imgDestPath}/${imgDestName}`);
           }
           let imageSrcTf = `${addonInstance.teleFrameObjects.config.imageFolder}/${imgDestName}`;
           uploadedFile.mv(imgDestPath);
@@ -125,7 +130,7 @@ const runServer = (addonInstance, listenPort) => {
   server.use(express.static(path.resolve((`${__dirname}/../public`))));
   server.use(express.static(path.resolve(`${__dirname}/../node_modules`)));
   // use installed node_modules and some assets from TeleFrame to save some space on the raspberries
-  server.use(express.static(path.resolve(`${__dirname}/../../../node_modules`)));
+  server.use(express.static(path.resolve(`${teleFramePath}/node_modules`)));
   // don't send the images.json
   server.use('/images', (req, res, next) => {
     if (req.url.search(/\.json$/) > -1) {
@@ -134,7 +139,7 @@ const runServer = (addonInstance, listenPort) => {
     next();
   });
   // assets from TeleFrame
-  ['images', 'fonts', 'sounds', 'js'].forEach(folder => server.use(`/${folder}`, express.static(path.resolve(`${__dirname}/../../../${folder}`))));
+  ['images', 'fonts', 'sounds', 'js'].forEach(folder => server.use(`/${folder}`, express.static(path.resolve(`${teleFramePath}/${folder}`))));
 
   // run the server
   server.listen(listenPort, () => addonInstance.logger.info(`Server listen on port ${listenPort}`))

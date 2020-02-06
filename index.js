@@ -24,6 +24,7 @@ class WebRemote extends AddonBase {
     this.registerListener('renderer-ready', () => {
       webServer.runServer(this, config.port || 3000);
     }, true);
+    this.registerListener('images-loaded', () => this.updateStatus({ unseenCount: this.getUnseenCount() }));
     this.registerListener(['starImage', 'unstarImage'], index => this.updateStatus({ image: this.images[index]}));
     this.registerListener('paused', isPaused => this.updateStatus({ isPaused: isPaused }));
     this.registerListener('muted', isMuted => this.updateStatus({ isMuted: isMuted }));
