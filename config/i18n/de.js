@@ -1,8 +1,8 @@
 var i18n = {
   // Info switch screen on
-  switchScreenOn: 'Bildschrim wird eingeschaltet...',
+  switchScreenOn: 'Bildschirm wird eingeschaltet...',
   // Info switch screen off
-  switchScreenOff: 'Bildschrim wird ausgeschaltet...',
+  switchScreenOff: 'Bildschirm wird ausgeschaltet...',
   // UploadDlgTitle
   uploadDlgTitle: 'Wähle ein Bild oder Video',
 };

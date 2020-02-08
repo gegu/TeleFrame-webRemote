@@ -25,6 +25,9 @@
     var audio = new Audio(`/sounds/${config.playSoundOnRecieve}`);
   }
 
+  // append host o the page title 
+  $('title').text(`${$('title').text()} | ${location.host}`);
+
   // full screen toogle callback function
   const toggleFullScreen = () => screenfull.toggle($('body')[0]);
 

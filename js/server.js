@@ -2,7 +2,6 @@ const express = require('express');
 const fileUpload = require('express-fileupload');
 const bodyParser = require('body-parser');
 const path = require('path');
-const {exec} = require('child_process');
 const server = express();
 const supportedUploadFileTypes = ['jpg', 'mp4'];
 const supportedUploadMimeTypes = ['image/jpeg', 'video/mpeg'];
