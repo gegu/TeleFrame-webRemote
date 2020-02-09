@@ -1,6 +1,6 @@
 (async () => {
 
-  const configObjects = await fetch('/tfconfig').then(response => response.json());
+  const configObjects = await fetch(`/tfconfig/${location.search.substr(1).split(/[&=]/).join('/')}`).then(response => response.json());
   const config = configObjects.config;
   const screen = configObjects.screen;
 
@@ -25,7 +25,7 @@
     var audio = new Audio(`/sounds/${config.playSoundOnRecieve}`);
   }
 
-  // append host o the page title 
+  // append host o the page title
   $('title').text(`${$('title').text()} | ${location.host}`);
 
   // full screen toogle callback function

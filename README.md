@@ -17,7 +17,7 @@ The touchbar elements for the web interface can be adjusted separately in the [c
 Without configuration the addon starts a web server on default port 3000.
 
 **SECURITY WARNING: Do not make the web server accessible from the Internet. There will be no user authentication and everybody can access your TeleFrame!**
-To implement this, it would be necessary to add user authentication to the server and operate it with SSL.
+To implement this, it would be necessary to add user authentication to the server and operate it with SSL or use a VPN connection.
 
 ---
 ## Installation

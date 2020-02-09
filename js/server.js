@@ -26,7 +26,10 @@ const runServer = (addonInstance, listenPort) => {
 
   // TeleFrame config request
   // For security reasons some config keys will be removed
-  server.get('/tfconfig', (req, res) => {
+  server.get('/tfconfig/*', (req, res) => {
+    let args = `${req.originalUrl.replace(/^\/tfconfig\//, '')}`;
+    args = args.split('/');
+
     // work with a cloned config
     const conf = JSON.parse(JSON.stringify(addonInstance.teleFrameObjects.config));
     // remove some keys for security reasons or if they unneeded
@@ -35,10 +38,15 @@ const runServer = (addonInstance, listenPort) => {
       .forEach(key => delete conf[key]);
     // send only our own addon config
     conf.addonInterface.addons = { webRemote: addonInstance.config}
-    // load the phrases for the browsers language
-    conf.language = req.headers["accept-language"].split(',')[0];
+    // load  phrases for the requested language
+    let index = (args ? args.indexOf('lang') : -1);
+    if (index > -1 && args.length > ++index) {
+      conf.language = args[index];
+    } else {
+      // load the phrases for the browsers language
+      conf.language = req.headers["accept-language"].split(',')[0].substr(0, 2);
+    }
     delete conf.phrases;
-
     const initLanguage = require(path.resolve(`${teleFramePath}/js/initLanguage.js`));
     initLanguage(conf);
     conf.addonInterface.addons.webRemote.language = conf.language;
