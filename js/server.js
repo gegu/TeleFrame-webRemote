@@ -103,30 +103,35 @@ const runServer = (addonInstance, listenPort) => {
           const imgDestName = new Date().getTime() + uploadedFile.name.substr(uploadedFile.name.lastIndexOf('.')).toLowerCase();
           let imgDestPath = addonInstance.teleFrameObjects.config.imageFolder;
           // resolve relative paths if needed
-          if (imgDestPath.search(/^[.a-z0-9_-]/i)) {
+          if (imgDestPath.search(/^[.a-z0-9_-]/i) === 0) {
             imgDestPath = path.resolve(`${teleFramePath}/${imgDestPath}/${imgDestName}`);
           }
           let imageSrcTf = `${addonInstance.teleFrameObjects.config.imageFolder}/${imgDestName}`;
-          uploadedFile.mv(imgDestPath);
-          addonInstance.teleFrameObjects.imageWatchdog.newImage(imageSrcTf, 'Web remote', undefined, 0, 'Web remote', 0);
+          uploadedFile.mv(imgDestPath, err => {
+            if (err) {
+              addonInstance.logger.error(err.stack);
+              return res.status(500).send(err);
+            } else {
+              addonInstance.teleFrameObjects.imageWatchdog.newImage(imageSrcTf, 'Web remote', undefined, 0, 'Web remote', 0);
+              //push file details
+              const data = {
+                  name: uploadedFile.name,
+                  mimetype: uploadedFile.mimetype,
+                  size: uploadedFile.size
+              };
+
+              //return response
+              res.send({
+                  status: true,
+                  message: 'File uploaded',
+                  data: data
+              });
+            }
+          });
         } else {
           res.status(400).send(`Unsupported type! Send .${supportedUploadFileTypes.join(', .')}`);
           return false;
         }
-
-        //push file details
-        const data = {
-            name: uploadedFile.name,
-            mimetype: uploadedFile.mimetype,
-            size: uploadedFile.size
-        };
-
-        //return response
-        res.send({
-            status: true,
-            message: 'File uploaded',
-            data: data
-        });
       }
     } catch (_) {
       res.status(500).send('Server error');
