@@ -1,6 +1,6 @@
 # TeleFrame addon - webRemote
 
-**ATTENTION: Since the TeleFrame addon feature is still under development, this addon currently only works with the branch [feature/addon-interface](https://github.com/LukeSkywalker92/TeleFrame/tree/feature/addon-interface) of Teleframe!**
+**ATTENTION: Since the TeleFrame addon feature is still under development, this addon currently only works with the branch [develop](https://github.com/LukeSkywalker92/TeleFrame/tree/develop) of Teleframe!**
 
 This is an addon for the great [TeleFrame](https://github.com/LukeSkywalker92/TeleFrame) project, to demonstrate what is possible with the addon interface.
 
