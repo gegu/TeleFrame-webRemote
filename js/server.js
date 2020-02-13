@@ -112,7 +112,18 @@ const runServer = (addonInstance, listenPort) => {
               addonInstance.logger.error(err.stack);
               return res.status(500).send(err);
             } else {
-              addonInstance.teleFrameObjects.imageWatchdog.newImage(imageSrcTf, 'Web remote', undefined, 0, 'Web remote', 0);
+              if (!req.body.caption) {
+                // ensure undefined value for empty strings
+                req.body.caption = undefined;
+              }
+              if (!req.body.sender) {
+                // ensure undefined value for empty strings
+                req.body.sender = 'Web remote';
+              }
+              addonInstance.teleFrameObjects.imageWatchdog.newImage(imageSrcTf,
+                req.body.sender,
+                req.body.caption, 0,
+                req.body.sender, 0);
               //push file details
               const data = {
                   name: uploadedFile.name,

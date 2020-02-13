@@ -5,6 +5,10 @@ var i18n = {
   switchScreenOff: 'Bildschirm wird ausgeschaltet...',
   // UploadDlgTitle
   uploadDlgTitle: 'Wähle ein Bild oder Video',
+  // label for caption of the image to upload
+  uploadCaption: 'Nachricht für das Bild/Video',
+  // label for sender
+  uploadSender: 'Absender',
 };
 
 /*************** DO NOT EDIT THE LINE BELOW ***************/
