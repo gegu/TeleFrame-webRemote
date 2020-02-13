@@ -7,8 +7,8 @@ With this addon you can remote control your TeleFrame with a web browser. You ge
 For interaction you have a touchbar like in TeleFrame by default, with additional elements to
 
 - toggle screen on/off when commands for screen on/off are defined in TeleFrame.
-- uploading pictures/videos (Works also with double click or with double tap)
-- toggle full screen display
+- uploading pictures/videos
+- toggle full screen display (Works also with double click or with double tap)
 
 The touchbar elements for the web interface can be adjusted separately in the [configuration](#configuration-options).
 
