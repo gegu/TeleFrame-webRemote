@@ -1,0 +1,191 @@
+@import url('/@fortawesome/fontawesome-free/css/all.min.css');
+
+html {
+  height: 100%;
+}
+
+body {
+  background-color: black;
+  margin: 0;
+  font-family: "Lato", "NotoColorEmoji", "Helvetica Neue", Helvetica, sans-serif;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+h1 {
+  color: white;
+  text-align: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  z-index: 0;
+}
+
+.touch-container {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  z-index: 1050;
+}
+
+.imgcontainer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: none;
+}
+
+.sender {
+  position: absolute;
+  padding: 10 20;
+  font-family: "Bowlby", "NotoColorEmoji";
+  font-size: xx-large;
+}
+
+.caption {
+  position: absolute;
+  width: auto;
+  max-width: 90%;
+  height: auto;
+  padding: 10 20;
+  font-family: "Roboto-Bold", "NotoColorEmoji";
+  font-size: xx-large;
+}
+
+.image {
+  /*position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: none;*/
+}
+
+@font-face {
+  font-family: "Lato";
+  font-style: normal;
+  font-weight: 400;
+  src: local("Lato-Regular"), url(/fonts/Lato-Regular.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: "Bowlby";
+  font-style: normal;
+  font-weight: 400;
+  src: local("BowlbyOneSC-Regular"),
+    url(/fonts/BowlbyOneSC-Regular.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: "Roboto-Bold";
+  font-style: normal;
+  font-weight: 400;
+  src: local("Roboto-Bold"), url(/fonts/Roboto-Bold.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: "NotoColorEmoji";
+  font-style: normal;
+  font-weight: 400;
+  src: local("NotoColorEmoji"), url(/fonts/NotoColorEmoji.ttf) format("truetype");
+}
+
+.spinner {
+  margin: 50px;
+  height: 28px;
+  width: 28px;
+  animation: rotate 0.8s infinite linear;
+  border: 8px solid #e10611;
+  border-right-color: transparent;
+  border-radius: 50%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.touch-bar-container {
+  width: 100%;
+  display: block;
+  position: fixed;
+}
+
+.touch-bar {
+  background: #656565;
+  opacity: 50%;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  display: flex;
+  justify-content: space-between;
+}
+
+.touch-bar-blur {
+  backdrop-filter: blur(20px);
+  height: 100%;
+  width: 100%;
+  position: absolute;
+}
+
+.touchBarElement {
+  margin: auto;
+  color: white;
+}
+
+.disabled-icon {
+  color: #333;
+}
+
+.new-asset {
+  color: greenyellow;
+}
+
+/* required for screenfull */
+::backdrop
+{
+    background-color: rgba(255,255,255,0);
+}
+
+.status-icon {
+  height :100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  color: #eee;
+  background: rgba(0,0,0,0.7);
+  padding-top: 30%;
+  text-align: center;
+  font-size: 18px;
+  z-index: 1070;
+}
+.status-icon i {
+  font-size: 30px;
+  border-radius: 2px;
+}
+
+.status-icon div {
+  font-size: 18px;
+}
+
+#loadicon i {
+  animation: rotate 0.8s infinite linear;
+}
