@@ -140,20 +140,46 @@
   }
 
   async function upload() {
+    let sender = 'Web remote';
+    if (localStorage) {
+        sender = (localStorage.getItem('sender') || 'Web remote').replace(/"/g, '');
+    }
     const supportedUploadFileTypes = await fetch('/upload/fileTypes').then(response => response.json());
-    const { value: asset } = await Swal.fire({
+    const { value: formValues } = await Swal.fire({
       title: config.addonInterface.addons.webRemote.phrases.uploadDlgTitle,
-      input: 'file',
       showCancelButton: true,
-      inputAttributes: {
-        accept: `.${supportedUploadFileTypes.join(',.')}`,
-        'aria-label': 'Upload'
+      // input: 'file',
+      // inputAttributes: {
+      //   accept: `.${supportedUploadFileTypes.join(',.')}`,
+      //   'aria-label': 'Upload'
+      // },
+      html:
+`<label for="sender">${config.addonInterface.addons.webRemote.phrases.uploadSender}</label>
+<input id="sender" class="swal2-input" type="text" maxlength="50" value="${sender}">
+<input id="asset" class="swal2-input" type="file" accept: .${supportedUploadFileTypes.join(',.')}>
+<label for="caption">${config.addonInterface.addons.webRemote.phrases.uploadCaption}</label>
+<input id="caption" class="swal2-input" type="text" maxlength="500">`,
+      focusConfirm: false,
+      preConfirm: () => {
+        const sender = $('#sender').val().replace(/"/g, '');
+        if (localStorage) {
+          localStorage.setItem('sender', sender);
+        }
+
+        return [
+          $('#caption').val(),
+          $('#asset')[0].files[0],
+          sender
+        ]
       }
+
     });
 
-    if (asset) {
+    if (formValues) {
       const formData = new FormData();
-      formData.append('asset', asset);
+      formData.append('caption', formValues[0]);
+      formData.append('asset', formValues[1]);
+      formData.append('sender', formValues[2]);
       await fetch('/upload', {method: "POST", body: formData})
         .then(response => response.json())
         .then(_ => Swal.fire({
