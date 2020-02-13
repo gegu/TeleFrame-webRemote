@@ -1,7 +1,5 @@
 # TeleFrame addon - webRemote
 
-**ATTENTION: Since the TeleFrame addon feature is still under development, this addon currently only works with the branch [develop](https://github.com/LukeSkywalker92/TeleFrame/tree/develop) of Teleframe!**
-
 This is an addon for the great [TeleFrame](https://github.com/LukeSkywalker92/TeleFrame) project, to demonstrate what is possible with the addon interface.
 
 With this addon you can remote control your TeleFrame with a web browser. You get the same output that TeleFrame is currently displaying, with a responsive interface.
