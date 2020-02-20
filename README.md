@@ -35,9 +35,9 @@ npm install
 Then Restart TeleFrame. Open a web browser and enter the IP of your TeleFrame including the configured port to remote control your TeleFrame.
 For example: `http://192.168.0.5:3000`
 
-## update
+## Update
 
-To install the **TeleFrame-webRemote**  addon demo open a terminal and execute:
+To update the **TeleFrame-webRemote**  addon demo open a terminal and execute:
 
 ```sh
 cd ~/TeleFrame/addons/TeleFrame-webRemote
