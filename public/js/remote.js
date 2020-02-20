@@ -139,6 +139,21 @@
     $('.fullscreen').remove();
   }
 
+  // initialize swipe handling
+  var manager = new Hammer.Manager(document.getElementById('touch-container'));
+  // Create a recognizer
+  var Swipe = new Hammer.Swipe({ direction: Hammer.DIRECTION_HORIZONTAL });
+  // Add the recognizer to the manager
+  manager.add(Swipe);
+  // Subscribe to a desired event
+  manager.on('swipe', function(e) {
+    if (e.offsetDirection === 2) {
+      $('.nextImage').trigger('click');
+    } else {
+      $('.previousImage').trigger('click');
+    }
+  });
+
   async function upload() {
     let sender = 'Web remote';
     if (localStorage) {

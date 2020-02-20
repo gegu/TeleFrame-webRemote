@@ -12,6 +12,8 @@ For interaction you have a touchbar like in TeleFrame by default, with additiona
 
 The touchbar elements for the web interface can be adjusted separately in the [configuration](#configuration-options).
 
+If your device supports it, swipe left/right can be used to show the previous/next image/video
+
 Without configuration the addon starts a web server on default port 3000.
 
 **SECURITY WARNING: Do not make the web server accessible from the Internet. There will be no user authentication and everybody can access your TeleFrame!**
@@ -32,6 +34,16 @@ npm install
 
 Then Restart TeleFrame. Open a web browser and enter the IP of your TeleFrame including the configured port to remote control your TeleFrame.
 For example: `http://192.168.0.5:3000`
+
+## update
+
+To install the **TeleFrame-webRemote**  addon demo open a terminal and execute:
+
+```sh
+cd ~/TeleFrame/addons/TeleFrame-webRemote
+git pull
+npm install
+```
 
 ## Configuration options
 
