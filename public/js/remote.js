@@ -88,7 +88,7 @@
     $(this).trigger('touchend');
   })
 
-  // dynamic touchbar height eand element size using css
+  // dynamic touchbar height and element size using css
   $('.touch-bar-container, .touchBarElement').css({
     height: '',
     bottom: '',
@@ -140,17 +140,41 @@
   }
 
   // initialize swipe handling
-  var manager = new Hammer.Manager(document.getElementById('touch-container'));
-  // Create a recognizer
-  var Swipe = new Hammer.Swipe({ direction: Hammer.DIRECTION_HORIZONTAL });
-  // Add the recognizer to the manager
-  manager.add(Swipe);
-  // Subscribe to a desired event
-  manager.on('swipe', function(e) {
-    if (e.offsetDirection === 2) {
-      $('.nextImage').trigger('click');
-    } else {
-      $('.previousImage').trigger('click');
+  new Hammer.Manager(document.getElementById('touch-container'), {
+    recognizers: [
+      [Hammer.Swipe, { direction: Hammer.DIRECTION_HORIZONTAL }],
+      [Hammer.Pinch]
+    ]
+  })
+  // Subscribe to the desired events
+  .on('swipe pinch', function(event) {
+    switch(event.type) {
+      case 'swipe':
+        $('.imgcontainer').animate({ left: (event.offsetDirection === Hammer.DIRECTION_LEFT ? '-=' : '+=') + '100%'}, 50,
+          () => $(event.offsetDirection === Hammer.DIRECTION_LEFT ? '.nextImage' : '.previousImage').trigger('click')
+        );
+        //$(event.offsetDirection === Hammer.DIRECTION_LEFT ? '.nextImage' : '.previousImage').trigger('click');
+        break;
+      case 'pinch':
+        if (event.scale) {
+          const MAX_SCALE_FACTOR = 5;
+          const ZOOM_FACTOR = 1;
+          const $assetContainer = $container.find('.imgcontainer');
+          if ($assetContainer.length > 0) {
+            let attrib = 'height';
+            // get the current zomm (starts with '100%')
+            let currentZoom = $assetContainer[0].style.width;
+            if (currentZoom) {
+              attrib = 'width';
+            } else {
+              currentZoom = $assetContainer[0].style.height;
+            }
+            currentZoom = parseInt(currentZoom.replace('%', ''));
+            $assetContainer.css(`max-${attrib}`, '');
+            $assetContainer[attrib](Math.min((100 * MAX_SCALE_FACTOR), Math.max((100 / MAX_SCALE_FACTOR), currentZoom + (event.scale > 1.0 ? ZOOM_FACTOR : -ZOOM_FACTOR))) + '%');
+          }
+        }
+        break;
     }
   });
 
@@ -196,7 +220,6 @@
       formData.append('asset', formValues[1]);
       formData.append('sender', formValues[2]);
       await fetch('/upload', {method: "POST", body: formData})
-        .then(response => response.json())
         .then(_ => Swal.fire({
             title: 'Upload 👍',
             showConfirmButton: false,
@@ -641,15 +664,13 @@
       $('body').append('<div id="loadicon" class="status-icon"><i class="fas fa-redo-alt"></i><div>Connecting...</div></div>')
     }
     fetch('/status')
-    .then(response => {
-      return response.json();
-    })
+    .then(response => response.json())
     .then(newStatus => {
       updateInterface(newStatus);
       fetchTimeout = setTimeout(updateStatus, config.addonInterface.addons.webRemote.statusUpdateInterval || 1000);
       status.offline = false;
     })
-    .catch(e => {
+    .catch(_ => {
       status.offline = true
       fetchTimeout = setTimeout(updateStatus, config.addonInterface.addons.webRemote.statusUpdateIntervalOffline || 10000);
     })

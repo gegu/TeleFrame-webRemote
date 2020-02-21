@@ -12,8 +12,21 @@ For interaction you have a touchbar like in TeleFrame by default, with additiona
 
 The touchbar elements for the web interface can be adjusted separately in the [configuration](#configuration-options).
 
-If your device supports it, swipe left/right can be used to show the previous/next image/video
+**Gestures**
 
+The following touch and mouse gestures are supported:
+
+| Gesture     | Touch       | Mouse support | Description                   |
+| ----------- | ----------- | ------------- | ----------------------------- |
+| Swipe left  | one finger  | yes           | show the next image/video     |
+| Swipe right | one finger  | yes           | show the previous image/video |
+| Spread      | two fingers | no            | Zooms the image/video in      |
+| Pinch       | two fingers | no            | Zooms the image/video out     |
+
+**To use a mouse for the swipe gestures:**
+Move in the wanted direction while keeping the left button down and release the button during the movement.
+
+**Web server port**
 Without configuration the addon starts a web server on default port 3000.
 
 **SECURITY WARNING: Do not make the web server accessible from the Internet. There will be no user authentication and everybody can access your TeleFrame!**
