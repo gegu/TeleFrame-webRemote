@@ -139,44 +139,48 @@
     $('.fullscreen').remove();
   }
 
-  // initialize swipe handling
-  new Hammer.Manager(document.getElementById('touch-container'), {
-    recognizers: [
-      [Hammer.Swipe, { direction: Hammer.DIRECTION_HORIZONTAL }],
-      [Hammer.Pinch]
-    ]
-  })
-  // Subscribe to the desired events
-  .on('swipe pinch', function(event) {
-    switch(event.type) {
-      case 'swipe':
-        $('.imgcontainer').animate({ left: (event.offsetDirection === Hammer.DIRECTION_LEFT ? '-=' : '+=') + '100%'}, 50,
-          () => $(event.offsetDirection === Hammer.DIRECTION_LEFT ? '.nextImage' : '.previousImage').trigger('click')
-        );
-        //$(event.offsetDirection === Hammer.DIRECTION_LEFT ? '.nextImage' : '.previousImage').trigger('click');
-        break;
-      case 'pinch':
-        if (event.scale) {
-          const MAX_SCALE_FACTOR = 5;
-          const ZOOM_FACTOR = 1;
-          const $assetContainer = $container.find('.imgcontainer');
-          if ($assetContainer.length > 0) {
-            let attrib = 'height';
-            // get the current zomm (starts with '100%')
-            let currentZoom = $assetContainer[0].style.width;
-            if (currentZoom) {
-              attrib = 'width';
-            } else {
-              currentZoom = $assetContainer[0].style.height;
+  // initialize swipe and zoom handling
+  if (Hammer) {
+    new Hammer.Manager(document.getElementById('touch-container'), {
+      recognizers: [
+        [Hammer.Swipe, { direction: Hammer.DIRECTION_HORIZONTAL }],
+        [Hammer.Pinch]
+      ]
+    })
+    // Subscribe to the desired events
+    .on('swipe pinch', function(event) {
+      switch(event.type) {
+        case 'swipe':
+          $('.imgcontainer').animate({ left: (event.offsetDirection === Hammer.DIRECTION_LEFT ? '-=' : '+=') + '100%'}, 50,
+            () => $(event.offsetDirection === Hammer.DIRECTION_LEFT ? '.nextImage' : '.previousImage').trigger('click')
+          );
+          //$(event.offsetDirection === Hammer.DIRECTION_LEFT ? '.nextImage' : '.previousImage').trigger('click');
+          break;
+        case 'pinch':
+          if (event.scale) {
+            const MAX_SCALE_FACTOR = 5;
+            const ZOOM_FACTOR = 1;
+            const $assetContainer = $container.find('.imgcontainer');
+            if ($assetContainer.length > 0) {
+              let attrib = 'height';
+              // get the current zomm (starts with '100%')
+              let currentZoom = $assetContainer[0].style.width;
+              if (currentZoom) {
+                attrib = 'width';
+              } else {
+                currentZoom = $assetContainer[0].style.height;
+              }
+              currentZoom = parseInt(currentZoom.replace('%', '')) || 100;
+              $assetContainer.css(`max-${attrib}`, '');
+              $assetContainer[attrib](Math.min((100 * MAX_SCALE_FACTOR), Math.max((100 / MAX_SCALE_FACTOR), currentZoom + (event.scale > 1.0 ? ZOOM_FACTOR : -ZOOM_FACTOR))) + '%');
             }
-            currentZoom = parseInt(currentZoom.replace('%', ''));
-            $assetContainer.css(`max-${attrib}`, '');
-            $assetContainer[attrib](Math.min((100 * MAX_SCALE_FACTOR), Math.max((100 / MAX_SCALE_FACTOR), currentZoom + (event.scale > 1.0 ? ZOOM_FACTOR : -ZOOM_FACTOR))) + '%');
           }
-        }
-        break;
-    }
-  });
+          break;
+      }
+    });
+  } else {
+    console.warn(`Touch gestures not available! Update your installation of TeleFrame-webRemote using 'npm install'`);
+  }
 
   async function upload() {
     let sender = 'Web remote';
