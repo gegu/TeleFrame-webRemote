@@ -8,7 +8,7 @@ const path = require('path');
 const checkInstallation = (logger) => {
   const missingWebPackages = [];
   // directory checks
-  [`${__dirname}/../node_modules/hammerjs`, 'asdfcn/Test'].forEach(file => {
+  [`${__dirname}/../node_modules/hammerjs`].forEach(file => {
     if (!fs.existsSync(file)) {
       missingWebPackages.push(file.replace(/.*\/+(.*)/, '$1'));
     }
