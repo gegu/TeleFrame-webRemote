@@ -1,9 +1,13 @@
 const {AddonBase} = require(`${__dirname}/../../js/addonInterface`);
+const checkInstallation = require(`${__dirname}/js/checkInstall`);
 const webServer = require(`${__dirname}/js/server`);
 
 class WebRemote extends AddonBase {
   constructor(config) {
     super(config);
+
+    checkInstallation(this.logger);
+
     this.teleFrameObjects = {}
     this.status = {
       image: (this.images.length > 0 ? this.images[0] : {}),
