@@ -183,63 +183,142 @@
   }
 
   async function upload() {
+    const  UploadError = {
+      INVALID_FILE_SIZE: 1
+    };
+    const MAX_UPLOAD_SIZE = 1024*1024*20;
     let sender = 'Web remote';
     if (localStorage) {
         sender = (localStorage.getItem('sender') || 'Web remote').replace(/"/g, '');
     }
     const supportedUploadFileTypes = await fetch('/upload/fileTypes').then(response => response.json());
-    const { value: formValues } = await Swal.fire({
-      title: config.addonInterface.addons.webRemote.phrases.uploadDlgTitle,
-      showCancelButton: true,
-      // input: 'file',
-      // inputAttributes: {
-      //   accept: `.${supportedUploadFileTypes.join(',.')}`,
-      //   'aria-label': 'Upload'
-      // },
-      html:
+
+    fetch('/upload/fileTypes')
+    .then(response => response.json())
+    .then(supportedUploadFileTypes => Swal.fire({
+        title: config.addonInterface.addons.webRemote.phrases.uploadDlgTitle,
+        showCancelButton: true,
+        // input: 'file',
+        // inputAttributes: {
+        //   accept: `.${supportedUploadFileTypes.join(',.')}`,
+        //   'aria-label': 'Upload'
+        // },
+        html:
 `<label for="sender">${config.addonInterface.addons.webRemote.phrases.uploadSender}</label>
 <input id="sender" class="swal2-input" type="text" maxlength="50" value="${sender}">
-<input id="asset" class="swal2-input" type="file" accept: .${supportedUploadFileTypes.join(',.')}>
+<input id="asset" class="swal2-input" type="file" multiple accept: .${supportedUploadFileTypes.join(',.')}>
 <label for="caption">${config.addonInterface.addons.webRemote.phrases.uploadCaption}</label>
 <input id="caption" class="swal2-input" type="text" maxlength="500">`,
-      focusConfirm: false,
-      preConfirm: () => {
-        const sender = $('#sender').val().replace(/"/g, '');
-        if (localStorage) {
-          localStorage.setItem('sender', sender);
+        allowOutsideClick: false,
+        focusConfirm: false,
+        preConfirm: () => {
+          const sender = $('#sender').val().replace(/"/g, '');
+          if (localStorage) {
+            localStorage.setItem('sender', sender);
+          }
+
+          return {
+            caption: $('#caption').val(),
+            files: $('#asset')[0].files,
+            sender: sender
+          }
         }
 
-        return [
-          $('#caption').val(),
-          $('#asset')[0].files[0],
-          sender
-        ]
+      })
+    )
+    .then(({value: formValues}) => {
+//console.log('FileList lenght',formValues)
+      if (formValues && formValues.files.length) {
+        const formData = new FormData();
+        formData.append('caption', formValues.caption);
+        formData.append('sender', formValues.sender);
+
+        for (let index of Object.keys(formValues.files)) {
+          formData.append('asset', formValues.files[index]);
+        }
+        return formData;
       }
+      throw 'No files uploaded'
+    })
+    .then(formData => fetch('/upload', {method: "POST", body: formData}))
+    .then(_ => Swal.fire({
+        title: 'Upload 👍',
+        showConfirmButton: false,
+        timer: 5000,
+        icon: "success"
+      })
+    )
+    .catch(error => {
+      if (error) {
+        console.error('Upload error!', error);
+        Swal.fire({
+          title: 'Upload 🥺!',
+          showConfirmButton: false,
+          timer: 5000,
+          icon: "error"
+        })
 
+      }
     });
+//
+//       let uploadPromise = new Promise((resolve, reject) => resolve());
+//       const uploadErrors = [];
+// console.log(formValues[1]);
+//       for (let index of Object.keys(formValues[1])) {
+//         const file = formValues[1][index];
+//         const formData = new FormData();
+//         formData.append('caption', formValues[0]);
+//         formData.append('sender', formValues[2]);
+//         formData.append('asset', file);
+//
+//         uploadPromise.then(() => {
+//           if (file.size === 0 || file.size > MAX_UPLOAD_SIZE) {
+//             uploadErrors.push({
+//               name: file.name,
+//               error: UploadError.INVALID_FILE_SIZE
+//             });
+//             return;
+//           }
+//           fetch('/upload', {method: "POST", body: formData});
+//         })
+//         .catch(error => {
+//           console.error('Upload error!', error);
+//           uploadErrors.push({
+//             name: file.name,
+//             error: error.toString()
+//           });
+//         });
+//       }
+//
+//        uploadPromise.then(() => {
+//         if (uploadErrors.length) {
+//           console.error('Upload error!', error);
+//           Swal.fire({
+//             title: `Upload 🥺${uploadErrors.length !== formValues[1].length ? '👍' : ''}!`,
+//             showConfirmButton: false,
+//             timer: 5000,
+//             icon: "warning"
+//           })
+//         } else {
+//           Swal.fire({
+//             title: 'Upload 👍',
+//             showConfirmButton: false,
+//             timer: 5000,
+//             icon: "success"
+//           });
+//         }
+//       })
+//       .catch(error => {
+//         console.error(error);
+//         Swal.fire({
+//           title: `Upload 🥺!`,
+//           text: error,
+//           showConfirmButton: false,
+//           timer: 5000,
+//           icon: "error"
+//         })
+//       });
 
-    if (formValues) {
-      const formData = new FormData();
-      formData.append('caption', formValues[0]);
-      formData.append('asset', formValues[1]);
-      formData.append('sender', formValues[2]);
-      await fetch('/upload', {method: "POST", body: formData})
-        .then(_ => Swal.fire({
-            title: 'Upload 👍',
-            showConfirmButton: false,
-            timer: 5000,
-            icon: "success"
-          }))
-        .catch(error => {
-          console.error('Upload error!', error);
-          Swal.fire({
-            title: 'Upload 🥺!',
-            showConfirmButton: false,
-            timer: 5000,
-            icon: "error"
-          })
-        });
-    };
   }
 
   function showOffline() {
