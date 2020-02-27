@@ -121,7 +121,6 @@ const runServer = (addonInstance, listenPort) => {
           // update count
           ++result[fileError ? 'errorCount' : 'successCount'];
           if (sendResult) {
-addonInstance.logger.warn('updateResult', JSON.stringify(result))            
             if (result.errorCount > 0){
               // return http multi status
               res.status(207);
@@ -169,7 +168,7 @@ addonInstance.logger.warn('updateResult', JSON.stringify(result))
                 updateResult(i === (req.files.asset.length - 1), true, uploadedFile);
               }
             });
-            // avoid duplicate file names
+            // avoid duplicate image file names
             await new Promise(t => setTimeout(t, 1));
           } else {
             updateResult(i === (req.files.asset.length - 1), uploadedFile, `Unsupported type! Send .${supportedUploadFileTypes.join(', .')}`);
