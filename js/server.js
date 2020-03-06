@@ -96,52 +96,83 @@ const runServer = (addonInstance, listenPort) => {
             message: 'No file uploaded'
         });
       } else {
-        let uploadedFile = req.files.asset;
-        if (uploadedFile.name.match(new RegExp(`.(${supportedUploadFileTypes.join('|')})$`, 'i'))
-            && supportedUploadMimeTypes.indexOf(uploadedFile.mimetype) > -1) {
-          //move files to images directory
-          const imgDestName = new Date().getTime() + uploadedFile.name.substr(uploadedFile.name.lastIndexOf('.')).toLowerCase();
-          let imgDestPath = addonInstance.teleFrameObjects.config.imageFolder;
-          // resolve relative paths if needed
-          if (imgDestPath.search(/^[.a-z0-9_-]/i) === 0) {
-            imgDestPath = path.resolve(`${teleFramePath}/${imgDestPath}/${imgDestName}`);
-          }
-          let imageSrcTf = `${addonInstance.teleFrameObjects.config.imageFolder}/${imgDestName}`;
-          uploadedFile.mv(imgDestPath, err => {
-            if (err) {
-              addonInstance.logger.error(err.stack);
-              return res.status(500).send(err);
-            } else {
-              if (!req.body.caption) {
-                // ensure undefined value for empty strings
-                req.body.caption = undefined;
-              }
-              if (!req.body.sender) {
-                // ensure undefined value for empty strings
-                req.body.sender = 'Web remote';
-              }
-              addonInstance.teleFrameObjects.imageWatchdog.newImage(imageSrcTf,
-                req.body.sender,
-                req.body.caption, 0,
-                req.body.sender, 0);
-              //push file details
-              const data = {
-                  name: uploadedFile.name,
-                  mimetype: uploadedFile.mimetype,
-                  size: uploadedFile.size
-              };
+        const result = {
+          status: true,
+          successCount: 0,
+          errorCount: 0,
+          fileStatus: []
+        };
 
-              //return response
-              res.send({
-                  status: true,
-                  message: 'File uploaded',
-                  data: data
-              });
-            }
+        /**
+         * Append  file upload status to the result
+         * @param  {boolean} sendResult sendt the result to the client
+         * @param  {boolean} fileStatus success status
+         * @param  {File} uploadedFile the processed file
+         * @param  {[string|Object]} fileError
+         */
+        const updateResult = (sendResult, fileStatus, uploadedFile, fileError) => {
+          result.fileStatus.push({
+              status: fileStatus,
+              error: fileError,
+              name: uploadedFile.name,
+              mimetype: uploadedFile.mimetype,
+              size: uploadedFile.size
           });
-        } else {
-          res.status(400).send(`Unsupported type! Send .${supportedUploadFileTypes.join(', .')}`);
-          return false;
+          // update count
+          ++result[fileError ? 'errorCount' : 'successCount'];
+          if (sendResult) {
+            if (result.errorCount > 0){
+              // return http multi status
+              res.status(207);
+            }
+            res.send(result);
+          }
+        };
+
+        // work with array
+        if (!Array.isArray(req.files.asset)){
+          req.files.asset = [req.files.asset];
+        }
+        for (let i = 0; i < req.files.asset.length; i++) {
+          const uploadedFile = req.files.asset[i];
+
+          if (uploadedFile.name.match(new RegExp(`.(${supportedUploadFileTypes.join('|')})$`, 'i'))
+              && supportedUploadMimeTypes.indexOf(uploadedFile.mimetype) > -1) {
+            //move files to images directory
+            const imgDestName = new Date().getTime() + uploadedFile.name.substr(uploadedFile.name.lastIndexOf('.')).toLowerCase();
+            let imgDestPath = addonInstance.teleFrameObjects.config.imageFolder;
+            // resolve relative paths if needed
+            if (imgDestPath.search(/^[.a-z0-9_-]/i) === 0) {
+              imgDestPath = path.resolve(`${teleFramePath}/${imgDestPath}/${imgDestName}`);
+            }
+            let imageSrcTf = `${addonInstance.teleFrameObjects.config.imageFolder}/${imgDestName}`;
+            uploadedFile.mv(imgDestPath, error => {
+              if (error) {
+                addonInstance.logger.error(error.stack);
+                updateResult(false, uploadedFile, error);
+              } else {
+                if (!req.body.caption) {
+                  // ensure undefined value for empty strings
+                  req.body.caption = undefined;
+                }
+                if (!req.body.sender) {
+                  // ensure undefined value for empty strings
+                  req.body.sender = 'Web remote';
+                }
+                // inform TeöeFrame about hte new image/video
+                addonInstance.teleFrameObjects.imageWatchdog.newImage(imageSrcTf,
+                  req.body.sender,
+                  req.body.caption, 0,
+                  req.body.sender, 0);
+                //push file details
+                updateResult(i === (req.files.asset.length - 1), true, uploadedFile);
+              }
+            });
+            // avoid duplicate image file names
+            await new Promise(t => setTimeout(t, 1));
+          } else {
+            updateResult(i === (req.files.asset.length - 1), uploadedFile, `Unsupported type! Send .${supportedUploadFileTypes.join(', .')}`);
+          }
         }
       }
     } catch (_) {
