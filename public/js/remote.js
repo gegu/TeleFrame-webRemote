@@ -43,13 +43,13 @@
   };
 
   const touchBarElements = {
-    showNewest: new TouchBarElement('fas fa-history', () => fetch('/command/newest').then(() => updateStatus())),
-    previousImage: new TouchBarElement('far fa-arrow-alt-circle-left', () => fetch('/command/previous').then(() => updateStatus())),
-    playPause: new TouchBarElement('far fa-pause-circle', () => fetch('/command/playPause').then(() => updateStatus())),
-    nextImage: new TouchBarElement('far fa-arrow-alt-circle-right', () => fetch('/command/next').then(() => updateStatus())),
-    starImage: new TouchBarElement('far fa-star', () => fetch('/command/star').then(() => updateStatus())),
+    showNewest: new TouchBarElement('fas fa-history', () => fetch('/command/newest').then(updateStatus)),
+    previousImage: new TouchBarElement('far fa-arrow-alt-circle-left', () => fetch('/command/previous').then(updateStatus)),
+    playPause: new TouchBarElement('far fa-pause-circle', () => fetch('/command/playPause').then(updateStatus)),
+    nextImage: new TouchBarElement('far fa-arrow-alt-circle-right', () => fetch('/command/next').then(updateStatus)),
+    starImage: new TouchBarElement('far fa-star', () => fetch('/command/star').then(updateStatus)),
     deleteImage: new TouchBarElement('far fa-trash-alt', deleteImage),
-    mute: new TouchBarElement('fas fa-volume-up', () => fetch('/command/mute').then(() => updateStatus())),
+    mute: new TouchBarElement('fas fa-volume-up', () => fetch('/command/mute').then(updateStatus)),
     shutdown: new TouchBarElement('fas fa-power-off', shutdown),
     reboot: new TouchBarElement('fas fa-redo-alt', reboot),
     tfScreenToggle: new TouchBarElement('far fa-sun', tfScreenToggle),
@@ -182,64 +182,79 @@
     console.warn(`Touch gestures not available! Update your installation of TeleFrame-webRemote using 'npm install'`);
   }
 
-  async function upload() {
+  function upload() {
+    const  UploadError = {
+      INVALID_FILE_SIZE: 1
+    };
+    const MAX_UPLOAD_SIZE = 1024*1024*20;
     let sender = 'Web remote';
     if (localStorage) {
         sender = (localStorage.getItem('sender') || 'Web remote').replace(/"/g, '');
     }
-    const supportedUploadFileTypes = await fetch('/upload/fileTypes').then(response => response.json());
-    const { value: formValues } = await Swal.fire({
-      title: config.addonInterface.addons.webRemote.phrases.uploadDlgTitle,
-      showCancelButton: true,
-      // input: 'file',
-      // inputAttributes: {
-      //   accept: `.${supportedUploadFileTypes.join(',.')}`,
-      //   'aria-label': 'Upload'
-      // },
-      html:
+
+    fetch('/upload/fileTypes')
+    .then(response => response.json())
+    .then(supportedUploadFileTypes => Swal.fire({
+        title: config.addonInterface.addons.webRemote.phrases.uploadDlgTitle,
+        showCancelButton: true,
+        html:
 `<label for="sender">${config.addonInterface.addons.webRemote.phrases.uploadSender}</label>
 <input id="sender" class="swal2-input" type="text" maxlength="50" value="${sender}">
-<input id="asset" class="swal2-input" type="file" accept: .${supportedUploadFileTypes.join(',.')}>
+<input id="asset" class="swal2-input" type="file" multiple accept: .${supportedUploadFileTypes.join(',.')}>
 <label for="caption">${config.addonInterface.addons.webRemote.phrases.uploadCaption}</label>
 <input id="caption" class="swal2-input" type="text" maxlength="500">`,
-      focusConfirm: false,
-      preConfirm: () => {
-        const sender = $('#sender').val().replace(/"/g, '');
-        if (localStorage) {
-          localStorage.setItem('sender', sender);
+        allowOutsideClick: false,
+        focusConfirm: false,
+        preConfirm: () => {
+          const sender = $('#sender').val().replace(/"/g, '');
+          if (localStorage) {
+            localStorage.setItem('sender', sender);
+          }
+
+          return {
+            caption: $('#caption').val(),
+            files: $('#asset')[0].files,
+            sender: sender
+          }
         }
 
-        return [
-          $('#caption').val(),
-          $('#asset')[0].files[0],
-          sender
-        ]
+      })
+    )
+    .then(({value: formValues}) => {
+      if (formValues && formValues.files.length) {
+        const formData = new FormData();
+        formData.append('caption', formValues.caption);
+        formData.append('sender', formValues.sender);
+
+        for (let index of Object.keys(formValues.files)) {
+          formData.append('asset', formValues.files[index]);
+        }
+        return formData;
       }
-
+      // throw empty exception if no files selected to avoid error message output
+      throw undefined;
+    })
+    .then(formData => fetch('/upload', {method: "POST", body: formData}))
+    .then(_ => Swal.fire({
+        title: 'Upload 👍',
+        showConfirmButton: false,
+        timer: 5000,
+        icon: "success"
+      })
+    )
+    .catch(error => {
+      // error can be undefined
+      if (error) {
+        console.error('Upload error!', error);
+        Swal.fire({
+          title: 'Upload 🥺!',
+          showConfirmButton: false,
+          text: error,
+          timer: 5000,
+          icon: "error"
+        })
+      }
     });
-
-    if (formValues) {
-      const formData = new FormData();
-      formData.append('caption', formValues[0]);
-      formData.append('asset', formValues[1]);
-      formData.append('sender', formValues[2]);
-      await fetch('/upload', {method: "POST", body: formData})
-        .then(_ => Swal.fire({
-            title: 'Upload 👍',
-            showConfirmButton: false,
-            timer: 5000,
-            icon: "success"
-          }))
-        .catch(error => {
-          console.error('Upload error!', error);
-          Swal.fire({
-            title: 'Upload 🥺!',
-            showConfirmButton: false,
-            timer: 5000,
-            icon: "error"
-          })
-        });
-    };
   }
 
   function showOffline() {
@@ -292,7 +307,7 @@
     if (status.imagesCount === 0) {
       return;
     }
-    await fetch('/command/delete').then(() => updateStatus());
+    await fetch('/command/delete').then(updateStatus);
 
     if (config.confirmDeleteImage === false) {
       return;
@@ -319,7 +334,7 @@
   }
 
   async function shutdown() {
-    await fetch('/command/shutdown').then(() => updateStatus());
+    await fetch('/command/shutdown').then(updateStatus);
 
     if (config.confirmShutdown === false) {
       return;
@@ -345,7 +360,7 @@
   }
 
   async function reboot() {
-    await fetch('/command/reboot').then(() => updateStatus());
+    await fetch('/command/reboot').then(updateStatus);
 
     if (config.confirmReboot === false) {
       return;
@@ -642,9 +657,7 @@
 
   const updateInterface = (newStatus) => {
     if (newStatus.image && newStatus.image.src !== status.image.src) {
-      setTimeout(() => {
-        loadImage(newStatus.image, newStatus.fadeTime);
-      }, 10)
+      setTimeout(() => loadImage(newStatus.image, newStatus.fadeTime), 10)
     }
     if (newStatus.hasOwnProperty('isPaused') && newStatus.isPaused !== status.isPaused) {
       if (newStatus.isPaused) {
