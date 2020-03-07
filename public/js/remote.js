@@ -81,7 +81,7 @@
     elements: useTouchBarElemKeys
   });
 
-  $('.touch-container').off('touchend').on('click', () => touchBar.toggle());
+  $('.touch-container').off('touchend click').on('click', () => touchBar.toggle());
   $('.' + useTouchBarElemKeys.join(' ,.')).on('click', function(e) {
     e.stopPropagation();
   //  e.preventDefault();
