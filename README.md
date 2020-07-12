@@ -87,6 +87,21 @@ The following configuration options are available.
 | fullscreen     | _Additional_: Toggle fullscreen view                                                                  |
 
 
+### Headless setup
+
+You have an old phone to spare which you want to setup as digital photo frame but have no screen connected to the server itself?
+
+Create a virtual screen by executing the following command. Adjust the screen ID (:X) to your needs.
+
+```sh
+Xvfb :1 -screen 0 1920x1080x24+32 -fbdir /var/tmp
+```
+With the virtual screen running, you can now run the TeleFrame command. Make sure to use the same screen ID.
+```sh
+~/TeleFrame$ DISPLAY=:1 nohup npm start &
+```
+Success! The interface is now accessible on the port you defined.
+
 ## Contributing
 
 Please feel free to add [issues](https://github.com/gegu/TeleFrame-webRemote/issues) or send pull requests.
