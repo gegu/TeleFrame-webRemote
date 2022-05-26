@@ -1,6 +1,6 @@
 {
   "name": "teleframe-addon-webremote",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": "Web remote to control TeleFrame",
   "main": "index.js",
   "scripts": {
